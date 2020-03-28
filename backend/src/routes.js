@@ -2,17 +2,33 @@
  * Arquivos de rotas do aplicação
  */
 const express = require('express');
+const crypto  = require('crypto');
+const connection = require('./database/connection');
 
 /** Desaclopando o módulo de rotas do express para dentro de uma nova variável */
 const routes = express.Router()
 
-routes.post('/users', (request, response) => {
-    const params = request.body;
-    console.log(params);
-    return response.json({
-        evento: 'Semana OmoniStack',
-        aluno: 'Rodrigo Cabral'
+routes.get('/ongs', async (request, response) => {
+    const ongs = await connection('ongs').select('*');
+    
+    return response.json(ongs);
+});
+
+routes.post('/ongs', async (request, response) => {
+    const {name, email, whatsapp, city, uf} = request.body;
+
+    const id = crypto.randomBytes(4).toString('HEX');
+
+    await connection('ongs').insert({
+        id,
+        name,
+        email,
+        whatsapp,
+        city,
+        uf,
     });
+
+    return response.json({ id });
 });
 
 /** Exportar a variavel de dentro do arquivo para que possa ser acessível de outros */
